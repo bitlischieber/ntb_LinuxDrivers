@@ -1,0 +1,1 @@
+/usr/bin/c++   -g    CMakeFiles/drivertest.dir/main.o  -o drivertest -rdynamic 

@@ -1,0 +1,39 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x14\x00D\x00r\x00i\x00v\x00e\x00r\x00T\x00e\x00s\x00t)
+
+[CMake]
+Build Directory Count=1
+Current Build Directory Index=0
+ProjectRootRelative=./
+
+[CMake][CMake Build Directory 0]
+Build Directory Path=file:///home/ntb/work/ntb_LinuxDrivers/Aufg9/DriverTest/build
+Build Type=Debug
+CMake Binary=file:///usr/bin/cmake
+Environment Profile=
+Extra Arguments=
+Install Directory=
+
+[Launch]
+Launch Configurations=Launch Configuration 0
+
+[Launch][Launch Configuration 0]
+Configured Launch Modes=execute
+Configured Launchers=nativeAppLauncher
+Name=drivertest
+Type=Native Application
+
+[Launch][Launch Configuration 0][Data]
+Arguments=
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x02\x00\x00\x00\x14\x00D\x00r\x00i\x00v\x00e\x00r\x00T\x00e\x00s\x00t\x00\x00\x00\x14\x00d\x00r\x00i\x00v\x00e\x00r\x00t\x00e\x00s\x00t)
+Dependency Action=Build
+EnvironmentGroup=default
+Executable=file:///home/ntb/work/ntb_LinuxDrivers/Aufg9/DriverTest/
+External Terminal=konsole --noclose --workdir %workdir -e %exe
+Project Target=DriverTest,drivertest
+Use External Terminal=false
+Working Directory=
+isExecutable=false
+
+[Project]
+VersionControlSupport=kdevgit

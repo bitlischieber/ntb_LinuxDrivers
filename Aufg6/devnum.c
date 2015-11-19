@@ -33,7 +33,7 @@ static int __init init_function(void) {
       if(err) goto fail_reg;
   } // if MAJOR_ALLOCATION_STATIC
 
-  printk(KERN_INFO "Dummy device registered %u, %u", MAJOR(mDevice), MINOR(mDevice));
+  printk(KERN_INFO "Dummy device registered %u, %u\n", MAJOR(mDevice), MINOR(mDevice));
   return 0;
 
   // Failes to register device
@@ -50,7 +50,7 @@ static void __exit exit_function(void) {
   printk(KERN_ALERT "Dummy device unregistered\n");
 } // exit_function
 
-/* Initialissation
+/* Initialisation
 ** Makro defined methodes for load and unload module.
 */
 module_init(init_function);

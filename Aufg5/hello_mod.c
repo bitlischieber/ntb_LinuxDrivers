@@ -21,7 +21,7 @@ static void hello_exit(void) {
   printk(KERN_ALERT "Goodbye, cruel world\n");
 }
 
-/* Initialissation
+/* Initialisation
 ** Makro defined methodes for load and unload module.
 */
 module_init(hello_init);

@@ -22,11 +22,15 @@ Exercises for NTB walk through "Einstieg in die Linux Treiberentwicklung".
 ## Command hints
 ### Allocation and registration
 ```#include <linux/fs.h>``` is needed by ```register_chrdev_region```, ```alloc_chrdev_region``` and ```unregister_chrdev_region```.
+
 ```#include <linux/kdev_t.h>``` is needed by ```MKDEV(...,...)```, ```MINOR(...)``` and ```MAJOR(...)```.
 
 ### Printout
 Formated Kernel print message:
-```printk(KERN_INFO "Assigned major and minor numbers are: %u, %u", MAJOR(mDevice), MINOR(mDevice));```
+
+```printk(KERN_INFO "Assigned major and minor numbers are: %u, %u\n", MAJOR(mDevice), MINOR(mDevice));```
+
+Close the message string using ```\n``` otherwise, the message is throw until a ```\n``` was committed.
 
 | Loglevel | Description |
 |----------|-------------|
@@ -40,3 +44,10 @@ Formated Kernel print message:
 |KERN_DEBUG|A debug message typically superfluous|
 
 Source: http://www.makelinux.net/books/lkd2/ch18lev1sec3
+
+
+
+## Helpful resources
+https://www.kernel.org/doc/htmldocs/
+http://lxr.free-electrons.com/source/
+http://linux.die.net/man/2
