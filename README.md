@@ -11,6 +11,9 @@ Exercises for NTB walk through "Einstieg in die Linux Treiberentwicklung".
 |```rmmod <module>.ko```|Remove module from Kernel|
 |```dmesg```|Prints the Kernel log|
 |```tail```|Returns the last 10 lines of a file (usage i.e. ```dmesg | tail```)|
+|```cat```|Calls sequential 'open', 'read' and 'close'|
+|```scp <file> <user>@<target>:<desitnation>``` | Copy a file over ssh to the target|
+
 
 ## Kernel development restrictions
 - Driver can be interrupted at any time. Make sure, the usage of shared resources doesn't lead to any troubles.
@@ -45,9 +48,18 @@ Close the message string using ```\n``` otherwise, the message is throw until a 
 
 Source: http://www.makelinux.net/books/lkd2/ch18lev1sec3
 
+## Device rights
+
+An ```udev``` created device-file belongs to root. To make it accessible by user, the device-file rights can be changed manually using ```chmod```.
+Alternatively and more elegant is to define a rule in ```/etc/udev/rules.d/```. The rule filename has two parts: Order-Number and Description text, separated by dash.
+The content of the file looks like this:
+
+```KERNEL=="testDevice", OWNDER="root", GROUP"root", "MODE="0666"```
 
 
 ## Helpful resources
 https://www.kernel.org/doc/htmldocs/
+
 http://lxr.free-electrons.com/source/
+
 http://linux.die.net/man/2
