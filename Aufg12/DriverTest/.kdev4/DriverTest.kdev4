@@ -1,0 +1,15 @@
+[CMake]
+Build Directory Count=1
+Current Build Directory Index=0
+ProjectRootRelative=./
+
+[CMake][CMake Build Directory 0]
+Build Directory Path=file:///home/ntb/work/ntb_LinuxDrivers/Aufg12/DriverTest/DriverTest/build
+Build Type=
+CMake Binary=file:///usr/bin/cmake
+Environment Profile=
+Extra Arguments=-DCMAKE_TOOLCHAIN_FILE=~/zoom/buildroot-toolchain/buildroot-toolchain-HS14/share/buildroot/toolchainfile.cmake
+Install Directory=file:///usr/local
+
+[Project]
+VersionControlSupport=kdevgit
