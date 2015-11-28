@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ntb/work/ntb_LinuxDrivers/Aufg13/DriverTest/main.cpp
+iostream
+-
+stdio.h
+-
+fcntl.h
+-
+stdlib.h
+-
+unistd.h
+-
+
