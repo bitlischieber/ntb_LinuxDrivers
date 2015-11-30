@@ -49,6 +49,7 @@ Close the message string using ```\n``` otherwise, the message is throw until a 
 C error codes: /usr/include/asm-generic/errno-base.h
 
 Formats:
+
 | Data type | Format specifier |
 |-----------|------------------|
 |int|%d or %x|
