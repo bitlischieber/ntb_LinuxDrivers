@@ -1,0 +1,1 @@
+/home/ntb/zoom/buildroot-toolchain/buildroot-toolchain-HS14/bin/arm-buildroot-linux-gnueabi-g++   -std=c++11 -O3 -DNDEBUG    CMakeFiles/drivertest.dir/main.cpp.o  -o drivertest -rdynamic 
