@@ -65,13 +65,13 @@ Formats:
 |s64|%lld or %llx|
 |u64|%llu or %llx|
 
-Pointers:
-%pF versatile_init+0x0/0x110
-%pf versatile_init
-%pS versatile_init+0x0/0x110
-%pSR  versatile_init+0x9/0x110 (with __builtin_extract_return_addr() translation)
-%ps versatile_init
-%pB prev_fn_of_versatile_init+0x88/0x88
+Pointers:  
+%pF versatile_init+0x0/0x110  
+%pf versatile_init  
+%pS versatile_init+0x0/0x110  
+%pSR  versatile_init+0x9/0x110 (with __builtin_extract_return_addr() translation)  
+%ps versatile_init  
+%pB prev_fn_of_versatile_init+0x88/0x88  
 
 Source: http://www.makelinux.net/books/lkd2/ch18lev1sec3
 
