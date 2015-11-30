@@ -176,6 +176,11 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/drivertest.dir/build.make CMakeFiles/drivertest.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+# Download to target
+copy2board:
+	scp $(CMAKE_BINARY_DIR)/drivertest root@es057.ntb.ch:/media/ram
+.PHONY : copy2board
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"

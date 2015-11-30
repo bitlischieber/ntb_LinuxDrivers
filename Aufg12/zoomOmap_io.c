@@ -29,8 +29,6 @@ struct class *mClass;
 
 struct file_operations mFops = {
   .owner = THIS_MODULE,
-  //.read = deviceRead,
-  //.write = deviceWrite,
   .open = deviceOpen,
   .release = deviceClose
 };
@@ -82,17 +80,6 @@ int deviceOpen(struct inode * dev_node, struct file * dev_file) {
 }
 
 int deviceClose(struct inode * dev_node, struct file * dev_file) {
-
-  // u32 temp;
-  // static unsigned int *pinctrlBasePrt;
-  //
-  // pinctrlBasePrt = ioremap(GPIO_REG_BASE, GPIO_REG_SIZE);
-  //
-  // temp = ioread32(pinctrlBasePrt + GPIO_DDR_OFFSET);
-  // //temp &= ~0x0000A044;
-  // // Set GP0[2], GP0[6], GP0[13] and GP0[15] as Input
-  // temp |= ((1 << GPIO0_2) | (1 << GPIO0_6) | (1 << GPIO0_13) | (1 << GPIO0_15));
-  // iowrite32(temp, pinctrlBasePrt + GPIO_DDR_OFFSET);
 
   return 0;
 }

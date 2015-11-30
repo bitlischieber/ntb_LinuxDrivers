@@ -46,6 +46,32 @@ Close the message string using ```\n``` otherwise, the message is throw until a 
 |KERN_INFO|An informational message|
 |KERN_DEBUG|A debug message typically superfluous|
 
+C error codes: /usr/include/asm-generic/errno-base.h
+
+Formats:
+| Data type | Format specifier |
+|-----------|------------------|
+|int|%d or %x|
+|int|%u or %x|
+|long|%ld or %lx|
+|unsigned long|%lu or %lx|
+|long long|%lld or %llx|
+|unsigned long long|%llu or %llx|
+|size_t|%zu or %zx|
+|ssize_t|%zd or %zx|
+|s32|%d or %x|
+|u32|%u or %x|
+|s64|%lld or %llx|
+|u64|%llu or %llx|
+
+Pointers:
+%pF versatile_init+0x0/0x110
+%pf versatile_init
+%pS versatile_init+0x0/0x110
+%pSR  versatile_init+0x9/0x110 (with __builtin_extract_return_addr() translation)
+%ps versatile_init
+%pB prev_fn_of_versatile_init+0x88/0x88
+
 Source: http://www.makelinux.net/books/lkd2/ch18lev1sec3
 
 ## Device rights
@@ -56,6 +82,9 @@ The content of the file looks like this:
 
 ```KERNEL=="testDevice", OWNDER="root", GROUP"root", "MODE="0666"```
 
+## Makefiles
+
+Make will make files from other files. This can make troubles if you have a file named i.e. <<clean>> and in your makefile also used the label <<clean>>. In this case, make will use the file instead of handle <<clean>> as a label. Using the ```.PHONY``` command will tell make the name isn't associated with a file: ```.PHONY clean```.
 
 ## Helpful resources
 https://www.kernel.org/doc/htmldocs/

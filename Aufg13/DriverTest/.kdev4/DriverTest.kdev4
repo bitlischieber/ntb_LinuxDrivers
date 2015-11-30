@@ -12,7 +12,7 @@ Build Type=Release
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
 Extra Arguments=-DCMAKE_TOOLCHAIN_FILE=~/zoom/buildroot-toolchain/buildroot-toolchain-HS14/share/buildroot/toolchainfile.cmake
-Install Directory=
+Install Directory=file:///usr/local
 
 [Project]
 VersionControlSupport=kdevgit

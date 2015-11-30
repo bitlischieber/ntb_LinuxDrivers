@@ -30,8 +30,6 @@ struct class *mClass;
 
 struct file_operations mFops = {
   .owner = THIS_MODULE,
-  .read = deviceRead,
-  .write = deviceWrite,
   .open = deviceOpen,
   .release = deviceClose
 };
@@ -74,66 +72,6 @@ int deviceOpen(struct inode * dev_node, struct file * dev_file) {
   iowrite32(temp, pinctrlBasePrt + GPIO_DDR_OFFSET);
 
   return 0;
-}
-
-/* Return the switch state
-*/
-int deviceRead(struct file *dev_file, char __user *data, size_t size, loff_t *offs){
-
-  u32 temp;
-  char val;
-
-  static unsigned int *pinctrlBasePrt;
-
-  pinctrlBasePrt = ioremap(GPIO_REG_BASE, GPIO_REG_SIZE);
-
-  temp = ioread32(pinctrlBasePrt + GPIO_DATA_IN_OFFSET);
-  val = (char)(temp & ((1 << GPIO0_0) | (1 << GPIO0_1)) & 0x03);  // Mask the tact switches
-
-  printk(KERN_INFO "Switch state read %x\n", (val ^ 0x03));
-
-  // invert the tact switches (lines are pulled up)
-  if(put_user((val ^ 0x03), data)) {
-    return 0;
-  } else {
-    return -EINVAL;
-  } // if put_user
-
-
-}
-
-/* Switch the LEDs
-*/
-int deviceWrite(struct file *dev_file, const char __user *data, size_t size, loff_t *offs) {
-
-  u32 temp;
-  u8 val;
-  static unsigned int *pinctrlBasePrt;
-
-  // Get to be switched LEDs from userspace
-  if (!get_user(val,data)) {
-    // Data received
-    pinctrlBasePrt = ioremap(GPIO_REG_BASE, GPIO_REG_SIZE);
-
-    temp = ioread32(pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
-    // clear all fields
-    temp &= ~((1 << GPIO0_2) | (1 << GPIO0_6) | (1 << GPIO0_13) | (1 << GPIO0_15));
-    // set fields
-    if(val & 0x01) temp |= (1 << GPIO0_2);
-    if(val & 0x02) temp |= (1 << GPIO0_6);
-    if(val & 0x04) temp |= (1 << GPIO0_13);
-    if(val & 0x08) temp |= (1 << GPIO0_15);
-    iowrite32(temp, pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
-
-    printk(KERN_INFO "LED state written %x\n", val);
-
-    return 1;
-  } else {
-    // No data received
-    printk(KERN_INFO "No LED date received");
-    return -EINVAL;
-  } // if
-
 }
 
 int deviceClose(struct inode * dev_node, struct file * dev_file) {

@@ -1,1 +1,1 @@
-/home/ntb/work/ntb_LinuxDrivers/Aufg12/DriverTest/DriverTest/build/CMakeFiles/drivertest.dir
+/home/ntb/work/ntb_LinuxDrivers/Aufg12/DriverTest/build/CMakeFiles/drivertest.dir
