@@ -7,6 +7,7 @@
 #include <time.h>
 #include "../omapl138exp_io.h"
 
+
 int main(int argc, char **argv) {
 
     int dev = open("/dev/omapgpio", O_RDWR);
@@ -19,6 +20,7 @@ int main(int argc, char **argv) {
       char alife = 1;
       char number = 1;
       char swstate = 0;
+      _ledStruct ledStruct;
       time_t stim, ltim, tim;
 
       stim = time(NULL);
@@ -31,7 +33,11 @@ int main(int argc, char **argv) {
 	  ltim = tim;
 	  write(dev, &number, 1);
 	  number = number << 1;
-	  if (number > 0x08) number = 1;
+	  if (number > 0x04) number = 1;
+	  // blinken led
+	  ledStruct.LED_No = 3;
+	  ledStruct.LED_State = !ledStruct.LED_State;
+	  ioctl(dev, WRITE_LEDS, &ledStruct);
 	} // if
 
 	// kernel log: LED state

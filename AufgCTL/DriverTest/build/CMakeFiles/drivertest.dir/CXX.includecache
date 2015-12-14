@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ntb/work/ntb_LinuxDrivers/AufgCTL/DriverTest/main.cpp
+iostream
+-
+stdio.h
+-
+fcntl.h
+-
+stdlib.h
+-
+unistd.h
+-
+sys/ioctl.h
+-
+time.h
+-
+../omapl138exp_io.h
+/home/ntb/work/ntb_LinuxDrivers/AufgCTL/omapl138exp_io.h
+
+/home/ntb/work/ntb_LinuxDrivers/AufgCTL/omapl138exp_io.h
+
