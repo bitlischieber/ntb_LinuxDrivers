@@ -7,6 +7,7 @@
 #include <time.h>
 #include "../omapl138exp_io.h"
 
+void waitNegPulse(int);
 
 int main(int argc, char **argv) {
 
@@ -15,45 +16,58 @@ int main(int argc, char **argv) {
     if (dev != -1) {
       // successfully opened
       std::cout << "Device opened." << std::endl;
-      std::cout << "Push SW0 and SW1 to exit...or wait 30 seconds." << std::endl;
 
-      char alife = 1;
-      char number = 1;
-      char swstate = 0;
-      _ledStruct ledStruct;
-      time_t stim, ltim, tim;
-
-      stim = time(NULL);
-      ltim = stim;
-
-      while (alife) {
-
-	if (ltim < tim) {
-	  // update only every second
-	  ltim = tim;
-	  write(dev, &number, 1);
-	  number = number << 1;
-	  if (number > 0x04) number = 1;
-	  // blinken led
-	  ledStruct.LED_No = 3;
-	  ledStruct.LED_State = !ledStruct.LED_State;
-	  ioctl(dev, WRITE_LEDS, &ledStruct);
-	} // if
-
-	// kernel log: LED state
-	ioctl(dev, READ_LEDS, 0);
-	// kernel log: Tact switch state
-	ioctl(dev, READ_BUTTONS, 0);
-
-	// terminate after 30 secs...
-	tim = time(NULL);
-	if (difftime(tim, stim) > 30) alife = false;
-	// ...or if booth buttons are pressed
-	read(dev, &swstate, 1);
-	if (swstate == 0x03) alife = false;
-
-
-      } // while
+      uint8_t val;
+      struct _stopWatchStruct sw;
+      
+      std::cout << "All LEDs on." << std::endl;
+      sw.func = TFUNC_ALL_LEDS_ON;
+      ioctl(dev, INIT_TIMER, &sw);
+      ioctl(dev, ALL_LEDS_ON, 0);
+      ioctl(dev, INIT_TIMER, &sw);
+      std::cout << "  Action took " << sw.duration_us << " usec." << std::endl;
+      std::cout << "  Press SW0 to continue..." << std::endl;
+      waitNegPulse(dev);
+      
+      std::cout << "All LEDs off." << std::endl;
+      sw.func = TFUNC_ALL_LEDS_OFF;
+      ioctl(dev, INIT_TIMER, &sw);
+      ioctl(dev, ALL_LEDS_OFF, 0);
+      ioctl(dev, INIT_TIMER, &sw);
+      std::cout << "  Action took " << sw.duration_us << " usec." << std::endl;
+      std::cout << "  Press SW0 to continue..." << std::endl;
+      waitNegPulse(dev);
+      
+      std::cout << "LED Pattern 1." << std::endl;
+      sw.func = TFUNC_APPLY_PATTERN;
+      ioctl(dev, INIT_TIMER, &sw);
+      val = 0x05;
+      ioctl(dev, APPLY_PATTERN, &val);
+      ioctl(dev, INIT_TIMER, &sw);
+      std::cout << "  Action took " << sw.duration_us << " usec." << std::endl;
+      std::cout << "  Press SW0 to continue..." << std::endl;
+      waitNegPulse(dev);
+      
+      std::cout << "LED Pattern 2." << std::endl;
+      sw.func = TFUNC_APPLY_PATTERN;
+      ioctl(dev, INIT_TIMER, &sw);
+      val = 0x0A;
+      ioctl(dev, APPLY_PATTERN, &val);
+      ioctl(dev, INIT_TIMER, &sw);
+      std::cout << "  Action took " << sw.duration_us << " usec." << std::endl;
+      std::cout << "  Press SW0 to continue..." << std::endl;
+      waitNegPulse(dev);
+      
+      
+      std::cout << "LED Write." << std::endl;
+      sw.func = TFUNC_WRITE;
+      ioctl(dev, INIT_TIMER, &sw);
+      val = 0x03;
+      write(dev, &val, 1);
+      ioctl(dev, INIT_TIMER, &sw);
+      std::cout << "  Action took " << sw.duration_us << " usec." << std::endl;
+      std::cout << "  Press SW0 to exit..." << std::endl;
+      waitNegPulse(dev);
 
       close(dev);
       std::cout << "Driver closed." << std::endl;
@@ -61,7 +75,18 @@ int main(int argc, char **argv) {
     } else {
       // Open failed
       std::cout << "Error, couldn't open device! " << dev << std::endl;
-    }
+    } // if dev != -1
 
     return 0;
-}
+} // main
+
+void waitNegPulse(int dev) {
+  uint8_t btn, btnPrev;
+  btn = btnPrev;
+  while((btn == btnPrev) || (btn != 0)) {
+    btnPrev = btn;
+    ioctl(dev, READ_BUTTONS, &btn);
+    btn = btn & 0x01;
+  } // wend
+} // waitNegPulse
+

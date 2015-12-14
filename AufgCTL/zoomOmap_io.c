@@ -8,6 +8,7 @@
 #include <linux/cdev.h>     // Char devices
 #include <linux/uaccess.h>  // Access to data from userspace
 #include <linux/ioctl.h>
+#include <linux/time.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
 #include <asm/types.h>
@@ -27,12 +28,14 @@ static int deviceClose(struct inode *, struct file *);
 static int deviceRead(struct file *, char __user *, size_t, loff_t *);
 static int deviceWrite(struct file *, const char __user *, size_t, loff_t *);
 static long deviceIoctl(struct file *, unsigned int, unsigned long);
+void setLED(u8);
 
 /* Class variables
 */
 dev_t mDevice;
 struct cdev *mCdev;
 struct class *mClass;
+u32 mResCnt = 0;
 
 struct file_operations mFops = {
   .owner = THIS_MODULE,
@@ -42,6 +45,15 @@ struct file_operations mFops = {
   .unlocked_ioctl = deviceIoctl,
   .release = deviceClose
 };
+
+typedef struct {
+  enum TIMER_FUNCTION func;
+  u8 armed;
+  struct timeval start;
+  struct timeval stop;
+} func_timer;
+
+func_timer mTimer;
 
 /* Other methodes of module.
 */
@@ -111,25 +123,12 @@ int deviceRead(struct file *dev_file, char __user *data, size_t size, loff_t *of
 */
 int deviceWrite(struct file *dev_file, const char __user *data, size_t size, loff_t *offs) {
 
-  u32 temp;
   u8 val;
-  static unsigned int *pinctrlBasePrt;
 
   // Get to be switched LEDs from userspace
   if (!get_user(val,data)) {
     // Data received
-    pinctrlBasePrt = ioremap(GPIO_REG_BASE, GPIO_REG_SIZE);
-
-    temp = ioread32(pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
-    // clear all fields
-    temp &= ~((1 << GPIO0_2) | (1 << GPIO0_6) | (1 << GPIO0_13) | (1 << GPIO0_15));
-    // set fields
-    if(val & 0x01) temp |= (1 << GPIO0_2);
-    if(val & 0x02) temp |= (1 << GPIO0_6);
-    if(val & 0x04) temp |= (1 << GPIO0_13);
-    if(val & 0x08) temp |= (1 << GPIO0_15);
-    iowrite32(temp, pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
-
+    setLED(val);
     printk(KERN_INFO "LED state written %x\n", val);
 
     return 1;
@@ -141,8 +140,29 @@ int deviceWrite(struct file *dev_file, const char __user *data, size_t size, lof
 
 }
 
+void setLED(u8 value) {
+
+  u32 temp;
+  static unsigned int *pinctrlBasePrt;
+
+  pinctrlBasePrt = ioremap(GPIO_REG_BASE, GPIO_REG_SIZE);
+
+  temp = ioread32(pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
+  // clear all fields
+  temp &= ~((1 << GPIO0_2) | (1 << GPIO0_6) | (1 << GPIO0_13) | (1 << GPIO0_15));
+  // set fields
+  if(value & 0x01) temp |= (1 << GPIO0_2);
+  if(value & 0x02) temp |= (1 << GPIO0_6);
+  if(value & 0x04) temp |= (1 << GPIO0_13);
+  if(value & 0x08) temp |= (1 << GPIO0_15);
+  iowrite32(temp, pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
+  mResCnt++;
+
+} // setLED
+
 long deviceIoctl(struct file *dev_file, unsigned int cmd, unsigned long arg) {
 
+  _stopWatchStruct swStruct;
   u32 temp;
   u8 val;
   int error = 0;
@@ -154,14 +174,17 @@ long deviceIoctl(struct file *dev_file, unsigned int cmd, unsigned long arg) {
 
   switch (cmd) {
     case READ_LEDS:
+      if(mTimer.armed && mTimer.func == TFUNC_READ_LEDS) do_gettimeofday(&mTimer.start);
       temp = ioread32(pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
       // Rearange the bits to the lower nibble
       temp = ((temp >> GPIO0_2) | (temp >> GPIO0_6) | (temp >> GPIO0_13) | (temp >> GPIO0_15));
       val = (u8)(temp & 0x0f);
       printk(KERN_INFO "LED state: %x\n", val);
+      if(mTimer.armed && mTimer.func == TFUNC_READ_LEDS) do_gettimeofday(&mTimer.stop);
       break;
 
     case WRITE_LEDS:
+      if(mTimer.armed && mTimer.func == TFUNC_WRITE_LEDS) do_gettimeofday(&mTimer.start);
       // Read current state
       temp = ioread32(pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
       // Read data from user space
@@ -188,13 +211,82 @@ long deviceIoctl(struct file *dev_file, unsigned int cmd, unsigned long arg) {
         if(ledStruct.LED_State) temp |= (1 << GPIO0_15);
       } // LED 3
       iowrite32(temp, pinctrlBasePrt + GPIO_DATA_OUT_OFFSET);
+      mResCnt++;
       printk(KERN_INFO "LED state set!");
+      if(mTimer.armed && mTimer.func == TFUNC_WRITE_LEDS) do_gettimeofday(&mTimer.stop);
+      break;
+
+    case ALL_LEDS_ON:
+      if(mTimer.armed && mTimer.func == TFUNC_ALL_LEDS_ON) do_gettimeofday(&mTimer.start);
+      setLED(0x0f);
+      if(mTimer.armed && mTimer.func == TFUNC_ALL_LEDS_ON) do_gettimeofday(&mTimer.stop);
+      break;
+
+    case ALL_LEDS_OFF:
+      if(mTimer.armed && mTimer.func == TFUNC_ALL_LEDS_OFF) do_gettimeofday(&mTimer.start);
+      setLED(0x00);
+      if(mTimer.armed && mTimer.func == TFUNC_ALL_LEDS_OFF) do_gettimeofday(&mTimer.stop);
+      break;
+
+    case APPLY_PATTERN:
+      if(mTimer.armed && mTimer.func == TFUNC_APPLY_PATTERN) do_gettimeofday(&mTimer.start);
+      error = copy_from_user(&val, (void __user *)arg, sizeof(val));
+      if(error != 0) {
+        printk(KERN_ALERT "Couldn't read pattern!");
+        return -EINVAL;
+      }
+      setLED(val);
+      if(mTimer.armed && mTimer.func == TFUNC_APPLY_PATTERN) do_gettimeofday(&mTimer.stop);
+      break;
+
+    case GET_NOF_RES:
+      if(mTimer.armed && mTimer.func == TFUNC_GET_NOF_RES) do_gettimeofday(&mTimer.start);
+      error = copy_to_user((void __user *)arg, &mResCnt, sizeof(mResCnt));
+      if(error != 0) {
+        printk(KERN_DEBUG "Couldn't copy to userspace!");
+        return -1;
+      }
+      if(mTimer.armed && mTimer.func == TFUNC_GET_NOF_RES) do_gettimeofday(&mTimer.stop);
       break;
 
     case READ_BUTTONS:
+      if(mTimer.armed && mTimer.func == TFUNC_READ_BUTTONS) do_gettimeofday(&mTimer.start);
       temp = ioread32(pinctrlBasePrt + GPIO_DATA_IN_OFFSET);
       val = (u8)(temp & 0x03);
+      error = copy_to_user((void __user *)arg, &val, sizeof(val));
+      if(error != 0) {
+        printk(KERN_DEBUG "Couldn't copy to userspace!");
+        return -1;
+      }
       printk(KERN_INFO "Tact switch state: %x\n", val);
+      if(mTimer.armed && mTimer.func == TFUNC_READ_BUTTONS) do_gettimeofday(&mTimer.stop);
+      break;
+
+    case INIT_TIMER:
+      error = copy_from_user(&swStruct, (void __user *)arg, sizeof(swStruct));
+      if(error != 0) {
+        printk(KERN_ALERT "Couldn't read timer function!");
+        return -EINVAL;
+      }
+
+      if (mTimer.armed) {
+        // evaluate running timer
+        if (mTimer.func != swStruct.func) {
+          printk(KERN_ALERT "Timer already running with other function!");
+          return -EINVAL;
+        }
+        swStruct.duration_us = (mTimer.stop.tv_usec - mTimer.start.tv_usec);
+        mTimer.armed = 0;
+        error = copy_to_user((void __user *)arg, &swStruct, sizeof(swStruct));
+        if(error != 0) {
+          printk(KERN_DEBUG "Couldn't copy to userspace!");
+          return -1;
+        }
+      } else {
+        // Start new measure
+        mTimer.func = swStruct.func;
+        mTimer.armed = 1;
+      }
       break;
 
     default:
@@ -203,7 +295,7 @@ long deviceIoctl(struct file *dev_file, unsigned int cmd, unsigned long arg) {
       break;
   } // switch
 
-  return 0;// error;
+  return 0;
 }
 
 int deviceClose(struct inode * dev_node, struct file * dev_file) {
